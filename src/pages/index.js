@@ -1,21 +1,13 @@
 import { useEffect, useState } from "react";
 import { db } from "./firebase";
-import { doc, setDoc, Timestamp } from "firebase/firestore"; 
+import { doc, setDoc, onSnapshot, Timestamp } from "firebase/firestore"; 
 
 export default function Home() {
-  // const as = async () => {
-  //   let collectionName = "classes";
-  //   let docName = "teacher";
-  //   await setDoc(doc(db, collectionName, docName), {
-  //     code: code,
-  //     editor: "Editor Name",
-  //     updatedOn: new Date()
-  //   });
-  // }
-  // useEffect(()=> {
-  //   as();
-  // },[])
   const [code,setCode] = useState("");
+  const [newCode,setNewCode] = useState("");
+  const unsub = onSnapshot(doc(db, "classes", "teacher"), (doc) => {
+    setNewCode(doc.data().code)
+  });
   return (
     <>
       <div>Hello</div>
@@ -29,7 +21,7 @@ export default function Home() {
           updatedOn: new Date()
         });
       }}></textarea>
-      <input type="text" value={code} onChange={()=>{}} />
+      <input type="text" value={newCode} onChange={()=>{}} disabled />
     </>
   )
 }
