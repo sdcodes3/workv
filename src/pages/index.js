@@ -5,86 +5,78 @@ import { onValue, ref, set } from "firebase/database";
 export default function Home() {
   const [code,setCode] = useState();
   const [updates,setUpdate] = useState();
+  const [userType,setUserType] = useState("admi");
+  const [users,setUsers] = useState();
+  const [uId,setUId] = useState();
+  const [uName,setUName] = useState();
 
-  function writeUserData(userId, code) {
+  function writeUserData(userId, name, code) {
     set(ref(database, 'users/' + userId), {
+      name : name,
       code : code
     });
   }
 
-  useEffect(() => {
-    const something = onValue(ref(database, 'users/0'), (snapshot) => {
+  const cc = (uiid) => {
+    const something = onValue(ref(database, 'users/' + uiid), (snapshot) => {
+      // Called when database is updated of selected user from uiid
       const data = snapshot.val();
-      setUpdate(data.code)
+      // updation in admin panel (updates)
+      setUpdate(data?.code)
+      // updates for user -> editable (code)
+      setCode(data?.code)
+    });
+  }
+
+  useEffect(() => {
+    const something1 = onValue(ref(database, 'users'), (snapshot) => {
+      // Left Panel Updation (users)
+      setUsers(snapshot.val())
     });
   },[])
+
   return (
     <>
-    <main className="row g-0">
-      <div className="col col-md-3">
+    <main className="row g-0 d-flex">
+      <div className="col col-md-2">
         <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-          <li className="nav-item">
-            <a className="nav-link active" href="#">Name1</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link active" href="#">Name2</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link active" href="#">Name3</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link active" href="#">Name4</a>
-          </li>
+          {
+            users?.map((i,ui) => (
+            <li className="nav-item" key={i.name}>
+              <a className="nav-link active" href="#" id={ui} onClick={(event, ui) => {
+                setUId(event.target.id)
+                setUName(i.name)
+                cc(event.target.id)
+              }}>{i.name}
+              </a>
+            </li>)
+            )
+          }
         </ul>
       </div>
-      <div className="col"></div>
-    </main>
-    {/* <nav className="navbar navbar-expand-lg bg-light">
-      <div className="container-fluid">
-        <a className="navbar-brand" href="#">Navbar</a>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item">
-              <a className="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="#">Link</a>
-            </li>
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown
-              </a>
-              <ul className="dropdown-menu">
-                <li><a className="dropdown-item" href="#">Action</a></li>
-                <li><a className="dropdown-item" href="#">Another action</a></li>
-                <li><hr className="dropdown-divider" /></li>
-                <li><a className="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link disabled">Disabled</a>
-            </li>
-          </ul>
-          <form className="d-flex" role="search">
-            <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-            <button className="btn btn-outline-success" type="submit">Search</button>
-          </form>
+      <div className="col">
+        {
+        (userType != 'admin') ?
+        <div className="d-flex h-100">
+          <textarea value={code} onChange={(event) => {
+            setCode(event.target.value)
+            writeUserData(uId,uName,event.target.value)
+          }} className="w-100 h-100 border-0"></textarea>
         </div>
+        :
+        <div className="d-flex h-100">
+          <textarea value={updates} onChange={() => {}} className="w-100 h-100 border-0" disabled></textarea>
+        </div>
+        }
       </div>
-    </nav> */}
-    <div>Hello</div>
-    <div>
-      <textarea value={code} onChange={(event) => {
-        setCode(event.target.value)
-        writeUserData(0,event.target.value)
-      }}></textarea>
-    </div>
-    <div>
-      <textarea value={updates} onChange={() => {}}></textarea>
-    </div>
+      <div className="col-2">
+        <div className="h4 text-center py-2">Chat Area</div>
+        <input type="text" value={userType} onChange={(event) => {
+          setUserType(event.target.value);
+        }} />
+        <div className="h5">Current User : {uName}</div>
+      </div>
+    </main>
     </>
   )
 }
