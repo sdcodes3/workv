@@ -46,20 +46,15 @@ export default function Home() {
   
   const readUser = async (readId1) => {
     // Get data when user's name is clicked and user type is other then admin
-    if(readId != "n"){
-      const xx = await onValue(ref(database, mentorId+"/"+userId+"/"+readId+"/code" ),(snapshot) => {
-        if (snapshot.exists()) { 
-          if(localStorage.getItem('rid') == readId){
-            setUpdate(snapshot.val())
-          }
-        } else {
-          console.log("No data available");
+    const xx = await onValue(ref(database, mentorId+"/"+userId+"/"+readId1+"/code" ),(snapshot) => {
+      if (snapshot.exists()) { 
+        if(localStorage.getItem('rid') == readId1){
+          setUpdate(snapshot.val())
         }
-      });
-    }
-    else{
-      console.log("Select a student");
-    }
+      } else {
+        console.log("No data available");
+      }
+    });
   }
 
   async function getInitalData(url){
@@ -87,6 +82,12 @@ export default function Home() {
     });
   }
   
+  function clearLocal(){
+    window.onbeforeunload = function() {
+      localStorage.clear();
+    }
+  }
+
   useEffect(() => {
     if(localStorage.getItem("uid")){
       // From Local Storage
@@ -139,11 +140,22 @@ export default function Home() {
       <div className="col">
         {
         (que.type == 'User') ?
-        <div className="d-flex h-100">
-          <textarea value={code} onChange={(event) => {
-            setCode(event.target.value)
-            updateCode(mentorId+"/"+userId+"/code",event.target.value);
-          }} className="w-100 h-100 border-0"></textarea>
+        <div className="d-flex flex-column h-100 bg-light">
+          <div className="d-flex justify-content-between align-items-center px-2">
+            <div></div>
+            <div className="h4 text-center py-2">
+              Welcome {que.name}
+            </div>
+            <div>
+              <button onClick={signout} className="btn btn-danger rounded-0">Sign Out</button>
+            </div>
+          </div>
+          <div className="d-flex px-2 pb-2" style={{flex:1}}>
+            <textarea value={code} onChange={(event) => {
+              setCode(event.target.value)
+              updateCode(mentorId+"/"+userId+"/code",event.target.value);
+            }} className="w-100 h-100 border-0"></textarea>
+          </div>
         </div>
         :
         <div className="d-flex h-100">
@@ -151,11 +163,9 @@ export default function Home() {
         </div>
         }
       </div>
-      <div className="col-2">
+      <div className="col-3">
         <div className="h4 text-center py-2">Chat Area</div>
-        <div className="h5">Current User : { que.name }, {que.type}</div>
         <div className="">
-          <button onClick={signout} className="btn btn-danger rounded-0">Sign Out</button>
         </div>
       </div>
     </main>

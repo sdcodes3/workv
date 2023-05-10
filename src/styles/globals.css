@@ -9,7 +9,7 @@ main{
 
 textarea{
     outline: none;
-    resize: none;
+    resize: none !important;
     background-color: rgba(119, 136, 153, 0.2);
 }
 
