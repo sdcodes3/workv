@@ -41,7 +41,7 @@ export default function Home() {
                 var mentorId = "77c0YfdSuAfh8WhltMhszeLA9qa2";
             }
             else{
-                var mentorId = "lAUjidRe6mhDlw4Qqtd8AVe4Jv52";
+                var mentorId = "A1L6uRvLBNeBlSiuOpx3XxX8f4y2";
             }
             writeUserData(userCredential.user.uid, name, email, type, mentorId);
             localStorage.setItem("uid",userCredential.user.uid);
