@@ -166,7 +166,7 @@ export default function Home() {
                 {
                 users && studentNameWithId &&
                 Object.keys(users)?.map((i,ui) => (
-                  <Accordion.Item eventKey={ui}>
+                  <Accordion.Item eventKey={ui} key={ui}>
                     <Accordion.Header>{studentNameWithId[i]}</Accordion.Header>
                     <Accordion.Body>
                       {
@@ -249,7 +249,7 @@ export default function Home() {
               <textarea value={updates} onChange={() => {}} className="w-100 h-100 border-0 p-2" disabled></textarea>
               :
               <div className="text-center w-100 pt-5 h2 text-danger">
-                Select a student to display it's code!!
+                Select a student to display its code!!
               </div>
             }
           </div>
@@ -261,15 +261,14 @@ export default function Home() {
         <div className="chat-body p-2 d-flex flex-column gap-2" style={{flex:"1", maxHeight:"100%", overflowY:"auto"}}>
           {
             chatMsg.length > 0 && chatMsg.map((element,index) => (
-              (element.from == userId)?
-              (<div className="bg-warning bg-gradient p-2 pb-1 ms-auto d-flex flex-column justify-content-center gap-0" style={{ maxWidth: "75%", minWidth:"20%", width:"max-content", borderRadius:"10px 10px 0px 10px"}}>
+              (element.from == userId) ? <div key={index} className="bg-warning bg-gradient p-2 pb-1 ms-auto d-flex flex-column justify-content-center gap-0" style={{ maxWidth: "75%", minWidth:"20%", width:"max-content", borderRadius:"10px 10px 0px 10px"}}>
                 <div className="p-0 m-0 text-break">
                   {element.msg}
                 </div>
                 <div className="text-end" style={{fontSize:"0.65rem", marginTop:"-3px", letterSpacing:"0.5px"}}>
                   {element.time}
                 </div>
-              </div>)
+              </div>
               :
               (element.to == userId || element.to == "all") ?
               (
