@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { app, auth, database } from "../firebase"
+import { auth, database } from "../firebase"
 import { onValue, ref, set, get, update } from "firebase/database";
 import { useRouter } from "next/router";
-import { onAuthStateChanged, signOut, getAuth } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import Link from "next/link";
 import { Accordion } from "react-bootstrap";
 
@@ -10,9 +10,6 @@ export default function Home() {
   const [code,setCode] = useState();
   const [updates,setUpdate] = useState();
   const [users,setUsers] = useState();
-  const [editId,setEditId] = useState();
-  const [readName,setReadName] = useState();
-  const [editName,setEditName] = useState();
   
   
   // new
@@ -21,14 +18,14 @@ export default function Home() {
   const [mentorId, setMentorId] = useState();
   const [name, setName] = useState();
   const [studentNameWithId, setStudentNameWithId] = useState();
-  const [readId,setReadId] = useState("n");
   const [chat,setChat] = useState("");
   const [chatMsg,setChatMsg] = useState([]);
+  const [allUserData,setAllUserData] = useState();
+  const [sendTo, setSendTo] = useState();
 
   const router = useRouter();
   const que = router?.query;
   
-
   const sendChat = async () => {
     getChat();
     const snapshot = await get(ref(database, "chat/"));
@@ -44,7 +41,7 @@ export default function Home() {
       from: userId,
       name: name,
       type: userType,
-      to: "77c0YfdSuAfh8WhltMhszeLA9qa2",
+      to: sendTo,
       time: current_time,
       msg: chat
     })
@@ -83,7 +80,7 @@ export default function Home() {
   
   const readUser = async (readId1) => {
     // Get data when user's name is clicked and user type is other then admin
-    const xx = await onValue(ref(database, mentorId+"/"+userId+"/"+readId1+"/code" ),(snapshot) => {
+    await onValue(ref(database, mentorId+"/"+userId+"/"+readId1+"/code" ),(snapshot) => {
       if (snapshot.exists()) { 
         if(localStorage.getItem('rid') == readId1){
           setUpdate(snapshot.val())
@@ -117,6 +114,12 @@ export default function Home() {
     }).catch((error) => {
       console.error(error);
     });
+
+    const snapshot1 = await get(ref(database, "login/"));
+    if(snapshot1.exists())
+      setAllUserData(snapshot1?.val());
+    else
+      setAllUserData({})
   }
   
   function clearLocal(){
@@ -138,12 +141,14 @@ export default function Home() {
       setName(que?.name);
       if(que?.type == 'Faculty'){
         getStudents(uid);
+        setSendTo("77c0YfdSuAfh8WhltMhszeLA9qa2");
       }
       else if(que?.type == 'Admin'){
         getStudents("");
       }
       else{
         getInitalData(mid+"/"+uid);
+        setSendTo("77c0YfdSuAfh8WhltMhszeLA9qa2")
       }
       getChat();
     }
@@ -164,34 +169,24 @@ export default function Home() {
               (userType == "Admin") ?
               <Accordion defaultActiveKey={['0']} alwaysOpen>
                 {
-                users && studentNameWithId &&
+                users && studentNameWithId && allUserData &&
                 Object.keys(users)?.map((i,ui) => (
                   <Accordion.Item eventKey={ui} key={ui}>
                     <Accordion.Header>{studentNameWithId[i]}</Accordion.Header>
-                    <Accordion.Body>
+                    <Accordion.Body className="p-0">
                       {
                         Object.keys(users[i])?.map((element,index) => (
-                          <li className="nav-item border-top" key={index}>
+                          <li className="nav-item px-3" key={index}>
                         <Link className="nav-link active" href={"?name="+name+"&type="+userType} id={element} onClick={(event) => {
                           localStorage.setItem("rid",i+"/"+event.target.id);
-                          setReadId(i+"/"+event.target.id)
                           readUser(i+"/"+event.target.id)
-                        }}>{element}
-                        {console.log("Users : ",users)}
+                        }}> - {allUserData[element].name}
                         </Link>
                       </li>
                       ))
                       }
                     </Accordion.Body>
                   </Accordion.Item>
-                //   <li className="nav-item border-top" key={ui}>
-                //   <Link className="nav-link active text-end px-3" href={"?name="+name+"&type="+userType} id={i} onClick={(event) => {
-                //     localStorage.setItem("rid",event.target.id);
-                //     setReadId(event.target.id)
-                //     readUser(event.target.id)
-                //   }}>{studentNameWithId[i]}
-                //   </Link>
-                // </li>
                 ))
                 }
               </Accordion>
@@ -270,12 +265,13 @@ export default function Home() {
                 </div>
               </div>
               :
-              (element.to == userId || element.to == "all") ?
+              
               (
+                (userType == "Admin") ?
+                (allUserData) &&
                 <div>
-                  <div className="" style={{fontSize:"0.85rem"}}>{element.name} ({element.type})</div>
+                  <div className="" style={{fontSize:"0.85rem"}}>{element.name} ({element.type}) - {(element.to == userId) ? "You" : ( <span>{allUserData[(element.to)].name} ({allUserData[element.to].type}) </span>)} </div>
                   <div className="bg-info bg-gradient p-2 pb-1" style={{ maxWidth: "75%", minWidth:"20%", width:"max-content", borderRadius:"10px 10px 10px 0px"}}>
-                    <div></div>
                     <div className="p-0 m-0 text-break">
                       {element.msg}
                     </div>
@@ -284,17 +280,48 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              ):<></>
+                :
+                (element.to == userId || element.to == "all") &&
+                <div>
+                  <div className="" style={{fontSize:"0.85rem"}}>{element.name} ({element.type})</div>
+                  <div className="bg-info bg-gradient p-2 pb-1" style={{ maxWidth: "75%", minWidth:"20%", width:"max-content", borderRadius:"10px 10px 10px 0px"}}>
+                    <div className="p-0 m-0 text-break">
+                      {element.msg}
+                    </div>
+                    <div className="" style={{fontSize:"0.65rem", marginTop:"-3px", letterSpacing:"0.5px"}}>
+                      {element.time}
+                    </div>
+                  </div>
+                </div>
+              )
             ))
           }
         </div>
         <div className="chat-footer d-flex align-items-center gap-3 p-2 border-top pt-3">
-          <div className="w-100">
-            <textarea type="text" className="form-control shadow-none" value={chat} onChange={(event) => {
+          <div className="w-100 h-100">
+            <textarea type="text" className="form-control shadow-none h-100" value={chat} onChange={(event) => {
               setChat(event.target.value);
             }}></textarea>
           </div>
-          <div>
+          <div className="col-3 d-flex flex-column gap-2">
+            {
+              (userType == "Admin") &&
+              <div className="d-flex align-items-center gap-2" style={{fontSize:"0.75rem"}} >
+                <div className="text-nowrap">To : </div>
+                <select className="form-control shadow-none p-1 m-0 text-truncate" style={{fontSize:"0.75rem"}} onChange={(event) => {
+                  setSendTo(event.target.value);
+                }}>
+                  {
+                    allUserData &&
+                    Object.keys(allUserData)?.map((element,index) => (
+                      (element != userId) &&
+                      <option value={element}>{allUserData[element].name}</option>
+                      ))
+                  }
+                  <option value={"all"}>All</option>
+                </select>
+              </div>
+            }
             <button className="btn btn-primary rounded-0 py-1" onClick={sendChat} disabled={(chat == "")? true : false}>Send</button>
           </div>
         </div>
