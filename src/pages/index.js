@@ -315,7 +315,7 @@ export default function Home() {
                     allUserData &&
                     Object.keys(allUserData)?.map((element,index) => (
                       (element != userId) &&
-                      <option value={element}>{allUserData[element].name}</option>
+                      <option value={element} key={index}>{allUserData[element].name}</option>
                       ))
                   }
                   <option value={"all"}>All</option>
