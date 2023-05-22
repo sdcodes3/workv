@@ -46,8 +46,8 @@ export default function Home() {
     }
     return (
         <>
-        <main className="d-flex align-items-center justify-content-center">
-            <form className="d-flex flex-column border-2 border p-4 gap-4 px-5" onSubmit={handleSubmit}>
+        <main className="d-flex align-items-center justify-content-center p-1">
+            <form className="d-flex flex-column border-2 border p-4 gap-4 px-3 px-md-5" onSubmit={handleSubmit}>
                 <div className="h2 text-center">Login</div>
                 <div className="d-flex flex-column gap-2">
                     <div className="">Email</div>

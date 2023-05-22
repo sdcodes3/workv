@@ -145,6 +145,7 @@ export default function Home() {
       }
       else if(que?.type == 'Admin'){
         getStudents("");
+        setSendTo("all");
       }
       else{
         getInitalData(mid+"/"+uid);
@@ -177,7 +178,7 @@ export default function Home() {
                       {
                         Object.keys(users[i])?.map((element,index) => (
                           <li className="nav-item px-3" key={index}>
-                        <Link className="nav-link active" href={"?name="+name+"&type="+userType} id={element} onClick={(event) => {
+                        <Link className="nav-link active ps-3" href={"?name="+name+"&type="+userType} id={element} onClick={(event) => {
                           localStorage.setItem("rid",i+"/"+event.target.id);
                           readUser(i+"/"+event.target.id)
                         }}> - {allUserData[element].name}
@@ -197,7 +198,6 @@ export default function Home() {
               <li className="nav-item border-top" key={ui}>
                 <Link className="nav-link active text-end px-3" href={"?name="+name+"&type="+userType} id={i} onClick={(event) => {
                   localStorage.setItem("rid",event.target.id);
-                  setReadId(event.target.id)
                   readUser(event.target.id)
                 }}>{studentNameWithId[i]}
                 </Link>
@@ -255,13 +255,22 @@ export default function Home() {
         <div className="h4 m-0 text-center py-3 chat-header border-bottom bg-light">CHAT AREA</div>
         <div className="chat-body p-2 d-flex flex-column gap-2" style={{flex:"1", maxHeight:"100%", overflowY:"auto"}}>
           {
-            chatMsg.length > 0 && chatMsg.map((element,index) => (
-              (element.from == userId) ? <div key={index} className="bg-warning bg-gradient p-2 pb-1 ms-auto d-flex flex-column justify-content-center gap-0" style={{ maxWidth: "75%", minWidth:"20%", width:"max-content", borderRadius:"10px 10px 0px 10px"}}>
-                <div className="p-0 m-0 text-break">
-                  {element.msg}
-                </div>
-                <div className="text-end" style={{fontSize:"0.65rem", marginTop:"-3px", letterSpacing:"0.5px"}}>
-                  {element.time}
+            allUserData && chatMsg.length > 0 && chatMsg.map((element,index) => (
+              (element.from == userId) ? 
+              <div className="d-flex flex-column align-items-end">
+                {
+                  (userType == "Admin") &&
+                  <div style={{fontSize:"0.85rem"}}>
+                    To : {element.to == "all" ? "All" : allUserData[element.to].name}
+                  </div>
+                }
+                <div key={index} className="bg-warning bg-gradient p-2 pb-1 ms-auto d-flex flex-column justify-content-center gap-0" style={{ maxWidth: "75%", minWidth:"20%", width:"max-content", borderRadius:"10px 10px 0px 10px"}}>
+                  <div className="p-0 m-0 text-break">
+                    {element.msg}
+                  </div>
+                  <div className="text-end" style={{fontSize:"0.65rem", marginTop:"-3px", letterSpacing:"0.5px"}}>
+                    {element.time}
+                  </div>
                 </div>
               </div>
               :
@@ -299,7 +308,7 @@ export default function Home() {
         </div>
         <div className="chat-footer d-flex align-items-center gap-3 p-2 border-top pt-3">
           <div className="w-100 h-100">
-            <textarea type="text" className="form-control shadow-none h-100" value={chat} onChange={(event) => {
+            <textarea type="text" className="form-control shadow-none h-100" value={chat} autofocus onChange={(event) => {
               setChat(event.target.value);
             }}></textarea>
           </div>
@@ -318,7 +327,7 @@ export default function Home() {
                       <option value={element} key={index}>{allUserData[element].name}</option>
                       ))
                   }
-                  <option value={"all"}>All</option>
+                  <option value={"all"} selected>All</option>
                 </select>
               </div>
             }
