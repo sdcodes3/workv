@@ -257,7 +257,7 @@ export default function Home() {
           {
             allUserData && chatMsg.length > 0 && chatMsg.map((element,index) => (
               (element.from == userId) ? 
-              <div className="d-flex flex-column align-items-end">
+              <div className="d-flex flex-column align-items-end" key={index}>
                 {
                   (userType == "Admin") &&
                   <div style={{fontSize:"0.85rem"}}>
